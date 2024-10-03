@@ -58,7 +58,7 @@ for x in A2:
     print(x)
 
 # Number of iterations
-A3 = np.array([len(A1), len(A2)])
+A3 = np.array([len(A1)-1, len(A2)])
 print("A3 =", A3)
 
 A = np.array([[1, 2], [-1, 1]])  
