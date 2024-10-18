@@ -33,10 +33,14 @@ for modes in range(1, 6):
 
     normalized_eigenfunction = abs(y[:, 0] / np.sqrt(norm))
 
-    A1.append(abs(normalized_eigenfunction))
+    A1.append(normalized_eigenfunction)
     plt.plot(xshoot, normalized_eigenfunction, col[modes - 1], label=f'Mode {modes}')
 plt.show()  
 
-print(A1)
-print(A2) 
+A1 = np.transpose(A1)
+# rows, cols = A1.shape
+# print("Rows:", rows)  # Output: Rows: 5
+# print("Columns:", cols)  
+# print(A1)
+# print(A2) 
 
