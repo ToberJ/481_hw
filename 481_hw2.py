@@ -41,6 +41,6 @@ A1 = np.transpose(A1)
 # rows, cols = A1.shape
 # print("Rows:", rows)  # Output: Rows: 5
 # print("Columns:", cols)  
-# print(A1)
-# print(A2) 
+print(A1)
+print(A2) 
 
