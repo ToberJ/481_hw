@@ -236,3 +236,69 @@ for ic_type in ic_types:
 
     # Display the animation
     display_animation(X, Y, omega_time_series, t_eval, ic_type)
+def initial_condition(X, Y, type='single'):
+    if type == 'opposite_pair':
+        return (np.exp(-((X - 2) ** 2 + Y ** 2) / 1) -
+                np.exp(-((X + 2) ** 2 + Y ** 2) / 1))
+    elif type == 'same_pair':
+        return (np.exp(-((X - 2) ** 2 + Y ** 2) / 1) +
+                np.exp(-((X + 2) ** 2 + Y ** 2) / 1))
+    elif type == 'collision':
+        return (np.exp(-((X - 3) ** 2 + (Y - 3) ** 2) / 1) -
+                np.exp(-((X - 3) ** 2 + (Y + 3) ** 2) / 1) +
+                np.exp(-((X + 3) ** 2 + (Y - 3) ** 2) / 1) -
+                np.exp(-((X + 3) ** 2 + (Y + 3) ** 2) / 1))
+    elif type == 'random':
+        vortices = np.zeros_like(X)
+        num_vortices = np.random.randint(10, 16)
+        for _ in range(num_vortices):
+            x0 = np.random.uniform(-Lx / 2, Lx / 2)
+            y0 = np.random.uniform(-Ly / 2, Ly / 2)
+            amp = np.random.uniform(-1, 1)
+            ecc = np.random.uniform(1, 5)
+            vortices += amp * np.exp(-((X - x0) ** 2 + (Y - y0) ** 2) / ecc)
+        return vortices
+    else:
+        # Default to single vortex
+        return np.exp(-X ** 2 - Y ** 2 / 20)
+
+# Function to display the animation
+def display_animation(X, Y, omega_time_series, t_eval, ic_type):
+    D = omega_time_series.reshape(len(t_eval), m, m)
+    vmax = np.max(np.abs(D))
+    vmin = -vmax
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    im = ax.pcolormesh(X, Y, D[0], shading='auto', cmap='RdBu', vmin=vmin, vmax=vmax)
+    plt.colorbar(im, ax=ax)
+    ax.set_title(f'Vorticity at t = {t_eval[0]:.2f}')
+    ax.set_xlabel('x')
+    ax.set_ylabel('y')
+
+    def update(frame):
+        ax.clear()
+        im = ax.pcolormesh(X, Y, D[frame], shading='auto', cmap='RdBu', vmin=vmin, vmax=vmax)
+        ax.set_title(f'Vorticity at t = {t_eval[frame]:.2f}, IC: {ic_type}')
+        ax.set_xlabel('x')
+        ax.set_ylabel('y')
+        return [im]
+
+    anim = animation.FuncAnimation(fig, update, frames=len(t_eval), interval=200, blit=False)
+
+    plt.show()  # Display the animation window
+
+# Run simulations for each initial condition
+ic_types = ['opposite_pair', 'same_pair', 'collision', 'random']
+for ic_type in ic_types:
+    print(f"\nSimulating for initial condition: {ic_type}")
+    omega0 = initial_condition(X, Y, type=ic_type).flatten()
+    start_time = time.time()
+    solution = solve_ivp(rhs, t_span, omega0, t_eval=t_eval, method='RK45')
+    elapsed_time = time.time() - start_time
+    print(f"Simulation completed in {elapsed_time:.2f} seconds")
+
+    # Extract the solution
+    omega_time_series = solution.y.T  # Shape: (time_steps, n)
+
+    # Display the animation
+display_animation(X, Y, omega_time_series, t_eval, ic_type)
